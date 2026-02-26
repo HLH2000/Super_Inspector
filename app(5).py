@@ -1,6 +1,6 @@
 """
-最強糾察員 v4 ── 修正版 (護眼閱讀背景版)
-修正：IndexError / 白字 / 抽牌獨立大畫面 / 回合計數邏輯 / 護眼背景調整
+最強糾察員 v4 ── 餐盤金屬底色版
+修正：IndexError / 白字 / 抽牌獨立大畫面 / 回合計數邏輯 / 金屬背景
 """
 import streamlit as st
 import random
@@ -356,7 +356,7 @@ def resolve_pause(gs, target_idx):
 
 
 # ══════════════════════════════════════════════════════════════════
-#  CSS（護眼閱讀色調，提升文字對比）
+#  CSS
 # ══════════════════════════════════════════════════════════════════
 CSS = """
 <style>
@@ -366,9 +366,10 @@ html, body, [class*="css"] {
     font-family: 'Nunito', sans-serif;
     color: #1a1a1a !important;
 }
-/* 👇 修改了這裡：替換成護眼的淺灰藍漸層背景 */
+
+/* 👇 修改了這裡：替換成餐盤金屬質感的漸層底色 */
 .stApp {
-    background: linear-gradient(135deg, #F5F7FA 0%, #E8ECF1 100%);
+    background: linear-gradient(135deg, #dfdfdf 0%, #f4f4f4 20%, #c8c8c8 50%, #f0f0f0 80%, #b8b8b8 100%);
     background-attachment: fixed;
 }
 
@@ -377,7 +378,7 @@ html, body, [class*="css"] {
     font-family: 'Fredoka One', cursive;
     font-size: 2.6rem;
     text-align: center;
-    background: linear-gradient(135deg, #E65C5C, #E69A2E, #3BB8B0, #8A82E6); /* 稍微調暗漸層色以適應淺色背景 */
+    background: linear-gradient(135deg, #E65C5C, #E69A2E, #3BB8B0, #8A82E6); 
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -386,7 +387,7 @@ html, body, [class*="css"] {
 }
 @keyframes rainbowSlide { to { background-position: 200% center; } }
 .sub-title {
-    text-align: center; color: #666; font-size: .78rem; /* 加深顏色提升對比 */
+    text-align: center; color: #666; font-size: .78rem; 
     letter-spacing: 2px; margin-top: 2px;
 }
 
@@ -398,7 +399,7 @@ html, body, [class*="css"] {
     border: 2.5px solid #ddd;
     cursor: pointer;
     transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06); /* 陰影放輕柔 */
+    box-shadow: 0 2px 8px rgba(0,0,0,.06); 
     position: relative; user-select: none; overflow: hidden;
 }
 .card:hover {
@@ -434,7 +435,7 @@ html, body, [class*="css"] {
 
 /* ── 餐盤 ── */
 .plate-area {
-    background: rgba(255,255,255,.85); /* 調高背景不透明度，讓餐盤在淺灰背景上更凸顯 */
+    background: rgba(255,255,255,.85); 
     border: 2.5px dashed #ccc;
     border-radius: 14px; padding: 8px; min-height: 88px;
     backdrop-filter: blur(4px);
@@ -492,7 +493,7 @@ html, body, [class*="css"] {
 /* ── 過場換人 banner ── */
 .transition-banner {
     border-radius: 24px; padding: 36px 24px; text-align: center;
-    background: linear-gradient(135deg, #ffffff, #fffdf0, #fcf4f7); /* 柔和化過場背景 */
+    background: linear-gradient(135deg, #ffffff, #fffdf0, #fcf4f7); 
     border: 3px solid #FFD700;
     box-shadow: 0 8px 32px rgba(255,215,0,.2);
     animation: bannerPop .5s cubic-bezier(.34,1.56,.64,1);
@@ -515,7 +516,7 @@ html, body, [class*="css"] {
 /* ── 抽牌大畫面 banner ── */
 .draw-banner {
     border-radius: 24px; padding: 32px 24px; text-align: center;
-    background: linear-gradient(135deg, #f0f7ff, #faf5fc, #f2fbf4); /* 柔和化背景 */
+    background: linear-gradient(135deg, #f0f7ff, #faf5fc, #f2fbf4); 
     border: 3px solid #90CAF9;
     box-shadow: 0 8px 32px rgba(100,181,246,.2);
     animation: bannerPop .45s cubic-bezier(.34,1.56,.64,1);
@@ -547,7 +548,7 @@ html, body, [class*="css"] {
     box-shadow: 0 2px 7px rgba(0,0,0,.05);
     color: #1a1a1a !important;
 }
-.rank-bar-wrap { flex: 1; background: #d5d5d5; border-radius: 4px; height: 7px; overflow: hidden; } /* 稍微加深底色軌道 */
+.rank-bar-wrap { flex: 1; background: #d5d5d5; border-radius: 4px; height: 7px; overflow: hidden; } 
 .rank-bar { height: 100%; border-radius: 4px; transition: width .7s ease; }
 
 /* ── Phase 指示 ── */
