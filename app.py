@@ -1,7 +1,11 @@
 """
-最強糾察員 v6.0 ── 終極黑字 & 滿版警報升級版
-修正：全面消滅白字 / 結算區塊高對比重製 / 均衡加成改為 10 分
-新增：最先一盤模式達成時，觸發滿版全螢幕倒數警報
+遊戲發想者:胡文馨
+編寫:HLH
+2026/02/27
+"""
+"""
+最強糾察員 v6.1 ── 終極去白字 & 滿版警報升級版
+修正：強制複寫 Streamlit 內建元件 (拉桿、文字框、單選) 在深色模式下的白色標籤與數值
 """
 import streamlit as st
 import random
@@ -40,7 +44,7 @@ FUNC_CARDS = {
 INIT_HAND         = 5
 FOOD_PER_CAT      = 6
 FUNC_PER_TYPE     = 5
-BALANCED_BONUS    =  10  # 修正：均衡加成提升為 10 分
+BALANCED_BONUS    =  10  
 IMBALANCE_PENALTY = -10
 
 P_COLORS = [
@@ -235,7 +239,7 @@ def action_place(gs, hand_idx):
     st.session_state.sel = None
     
     if should_alert:
-        return  # 若觸發滿版警報，則中斷並進入警報畫面
+        return  
 
     check_emperor(gs, gs["turn"])
     advance_turn(gs)
@@ -362,15 +366,23 @@ def resolve_pause(gs, target_idx):
     advance_turn(gs)
 
 # ══════════════════════════════════════════════════════════════════
-#  CSS
+#  CSS (強化對 Streamlit 原生輸入元件的處理)
 # ══════════════════════════════════════════════════════════════════
 CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
-html, body, [class*="css"], .stMarkdown p, .stMarkdown span, .stMarkdown div, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+
+/* ⭐ 終極防護：強制所有一般文字、Streamlit 標籤、輸入框文字、數值標記在任何模式下都是黑字 */
+html, body, [class*="css"], [class*="st-emotion-cache"],
+.stMarkdown p, .stMarkdown span, .stMarkdown div, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3,
+label, label p, input, 
+[data-testid="stTickBarMin"], [data-testid="stTickBarMax"], [data-testid="stThumbValue"],
+div[role="radiogroup"] p, div[role="radiogroup"] div {
     font-family: 'Nunito', sans-serif;
     color: #000000 !important; 
+    font-weight: 800;
 }
+
 .stApp {
     background: linear-gradient(135deg, #a0a5aa 0%, #cfd4d8 20%, #8a9095 50%, #c4c9cd 80%, #767b80 100%);
     background-attachment: fixed;
@@ -612,7 +624,7 @@ def page_action():
     with h1:
         st.markdown('<div class="main-title" style="font-size:1.8rem;text-align:left;">🥗 最強糾察員</div>', unsafe_allow_html=True)
         lbl, pbg = {"action":("⚡ 行動階段 — 選擇一張牌","#fff59d"), "pending_discard_hand":("💥 丟1張 — 選擇攻擊對象","#ef9a9a"), "pending_pause":("⛔ 暫停 — 選擇暫停對象","#b39ddb"), "confirm_draw":("✨ 確認手牌","#a5d6a7")}.get(phase, ("⚡ 行動階段", "#fff59d"))
-        st.markdown(f'<span style="display:inline-block; background:{pbg}; border:3px solid #333; font-weight:900; padding:6px 16px; border-radius:20px;">{lbl}</span>', unsafe_allow_html=True)
+        st.markdown(f'<span style="display:inline-block; background:{pbg}; border:3px solid #333; font-weight:900; padding:6px 16px; border-radius:20px; color:#000000;">{lbl}</span>', unsafe_allow_html=True)
     with h2: st.markdown(f'<div style="background:#ffffff;border:4px solid #42a5f5;border-radius:12px;padding:8px;text-align:center;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,0.1);color:#000000;">牌堆<br><span style="font-size:1.8rem;">{len(gs["deck"])}</span></div>', unsafe_allow_html=True)
     with h3: st.markdown(f'<div style="background:#ffffff;border:4px solid #ef5350;border-radius:12px;padding:8px;text-align:center;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,0.1);color:#000000;">棄牌<br><span style="font-size:1.8rem;">{gs["discard"][-1].emoji if gs["discard"] else "—"}</span></div>', unsafe_allow_html=True)
 
@@ -625,9 +637,9 @@ def page_action():
         render_ranking(players, ci, gs)
         if gs.get("countdown_turns") is not None:
             left_r = (gs["countdown_turns"] + len(players) - 1) // len(players)
-            st.markdown(f'<div class="event-item" style="border-color:#d84315;background:#ffccbc;text-align:center;">🚨 倒數：剩餘 {left_r} 輪！</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="event-item" style="border-color:#d84315;background:#ffccbc;text-align:center;color:#000000;">🚨 倒數：剩餘 {left_r} 輪！</div>', unsafe_allow_html=True)
         elif gs.get("last_round"):
-            st.markdown('<div class="event-item" style="border-color:#d84315;background:#ffccbc;text-align:center;">⚡ 最後一輪！</div>', unsafe_allow_html=True)
+            st.markdown('<div class="event-item" style="border-color:#d84315;background:#ffccbc;text-align:center;color:#000000;">⚡ 最後一輪！</div>', unsafe_allow_html=True)
 
     with right:
         st.markdown("**🍽️ 各玩家餐盤**")
@@ -642,8 +654,8 @@ def page_action():
                     cc = st.columns(min(len(p.plate), 5) or 1)
                     for j, c in enumerate(p.plate):
                         with cc[j % 5]: st.markdown(render_card(c, small=True), unsafe_allow_html=True)
-                else: st.markdown("<div style='text-align:center;padding:25px 0;font-weight:900;'>🈳 空</div>", unsafe_allow_html=True)
-                st.markdown("</div>" + (f'<div style="text-align:center;font-weight:900;color:#1b5e20;background:#c8e6c9;border-radius:6px;">✅ 均衡 +{BALANCED_BONUS}</div>' if p.is_balanced() else "") + "</div>", unsafe_allow_html=True)
+                else: st.markdown("<div style='text-align:center;padding:25px 0;font-weight:900;color:#000000;'>🈳 空</div>", unsafe_allow_html=True)
+                st.markdown("</div>" + (f'<div style="text-align:center;font-weight:900;color:#1b5e20;background:#c8e6c9;border-radius:6px;border:2px solid #4caf50;">✅ 均衡 +{BALANCED_BONUS}</div>' if p.is_balanced() else "") + "</div>", unsafe_allow_html=True)
 
         st.markdown("---")
         st.markdown(f'<div style="font-size:1.3rem; font-weight:900; background:#ffffff; border-radius:12px; padding:8px 16px; display:inline-block; border:4px solid {cur.color["header"]}; margin-bottom:20px; box-shadow:0 4px 10px rgba(0,0,0,0.15);color:#000000;">🎴 {cur.name} 的手牌（{len(cur.hand)} 張）</div>', unsafe_allow_html=True)
@@ -725,10 +737,10 @@ def page_result():
         with st.expander(f"{medals[ri]} {p.name}  ── {p.score} 分", expanded=(ri == 0)):
             dc1, dc2 = st.columns([2, 1])
             with dc1:
-                st.write(f"**餐盤：** {' '.join(c.emoji for c in p.plate) or '空'}")
+                st.markdown(f"**<span style='color:#000000;'>餐盤：</span>** {' '.join(c.emoji for c in p.plate) or '空'}", unsafe_allow_html=True)
                 for cat, cnt in cats.items():
                     pts_per, em = FOOD_CATS.get(cat, {}).get("pts", 0), FOOD_CATS.get(cat, {}).get("emoji", "")
-                    st.markdown(f'<div style="font-size:1.1rem;font-weight:900;padding:4px 0;">{em} {cat} × {cnt} 張 = <span style="color:#c62828;">{pts_per*cnt} 分</span></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="font-size:1.1rem;font-weight:900;padding:4px 0;color:#000000;">{em} {cat} × {cnt} 張 = <span style="color:#c62828;">{pts_per*cnt} 分</span></div>', unsafe_allow_html=True)
                 
                 # 高對比度重製的結算區塊提示
                 if bal_b: 
@@ -737,12 +749,12 @@ def page_result():
                     st.markdown(f'<div style="background:#ffcdd2; border:3px solid #d50000; padding:8px 12px; border-radius:8px; color:#000000 !important; font-weight:900; font-size:1.1rem; margin-bottom:5px;">❌ 失衡懲罰 {imbal}</div>', unsafe_allow_html=True)
             
             with dc2:
-                bal_str = f'<div style="background:#b9f6ca; border:2px solid #00c853; color:#000000 !important; border-radius:6px; padding:4px 8px; margin-top:5px; font-weight:900;">+{bal_b} 均衡</div>' if bal_b else ''
-                imbal_str = f'<div style="background:#ffcdd2; border:2px solid #d50000; color:#000000 !important; border-radius:6px; padding:4px 8px; margin-top:5px; font-weight:900;">{imbal} 失衡</div>' if imbal else ''
+                bal_str = f'<div style="background:#b9f6ca; border:3px solid #00c853; color:#000000 !important; border-radius:6px; padding:4px 8px; margin-top:5px; font-weight:900;">+{bal_b} 均衡</div>' if bal_b else ''
+                imbal_str = f'<div style="background:#ffcdd2; border:3px solid #d50000; color:#000000 !important; border-radius:6px; padding:4px 8px; margin-top:5px; font-weight:900;">{imbal} 失衡</div>' if imbal else ''
                 
                 st.markdown(f"""<div style="background:#ffffff;border:4px solid {p.color['header']};border-radius:16px;padding:16px;text-align:center;box-shadow:0 6px 15px rgba(0,0,0,0.15);color:#000000;">
                     <div style="font-weight:900;">食物基礎</div><div style="font-size:2.2rem;font-weight:900;">{raw}</div>
-                    <div style="font-weight:900;">{bal_str}{imbal_str}</div>
+                    <div style="font-weight:900; margin:10px 0;">{bal_str}{imbal_str}</div>
                     <div style="font-size:1.8rem;font-weight:900;color:#c62828;border-top:3px solid #ccc;margin-top:10px;padding-top:10px;">= {p.score} 分</div>
                 </div>""", unsafe_allow_html=True)
 
