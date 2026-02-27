@@ -4,10 +4,8 @@
 
 """
 最強糾察員 v6.1 
-"""
-#── 終極去白字 & 滿版警報升級版
-#修正：強制複寫 Streamlit 內建元件 (拉桿、文字框、單選) 在深色模式下的白色標籤與數值
 
+"""
 import streamlit as st
 import random
 from dataclasses import dataclass, field
@@ -367,27 +365,61 @@ def resolve_pause(gs, target_idx):
     advance_turn(gs)
 
 # ══════════════════════════════════════════════════════════════════
-#  CSS (強化對 Streamlit 原生輸入元件的處理)
+#  CSS
 # ══════════════════════════════════════════════════════════════════
 CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
 
-/* ⭐ 終極防護：強制所有一般文字、Streamlit 標籤、輸入框文字、數值標記在任何模式下都是黑字 */
-html, body, [class*="css"], [class*="st-emotion-cache"],
-.stMarkdown p, .stMarkdown span, .stMarkdown div, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3,
-label, label p, input, 
+/* ⭐ 背景設定 */
+.stApp {
+    background: linear-gradient(135deg, #a0a5aa 0%, #cfd4d8 20%, #8a9095 50%, #c4c9cd 80%, #767b80 100%);
+    background-attachment: fixed;
+}
+
+/* ⭐ 精準打擊：針對介面文字強制黑字，【避開】全域覆蓋以免破壞 arrow_down 圖示 */
+.stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3,
+label, label p,
 [data-testid="stTickBarMin"], [data-testid="stTickBarMax"], [data-testid="stThumbValue"],
-div[role="radiogroup"] p, div[role="radiogroup"] div {
+div[role="radiogroup"] p {
     font-family: 'Nunito', sans-serif;
     color: #000000 !important; 
     font-weight: 800;
 }
 
-.stApp {
-    background: linear-gradient(135deg, #a0a5aa 0%, #cfd4d8 20%, #8a9095 50%, #c4c9cd 80%, #767b80 100%);
-    background-attachment: fixed;
+/* ⭐ 修正玩家名稱輸入框：強制白底黑字，拒絕黑底融入背景 */
+div[data-baseweb="base-input"], div[data-baseweb="input"] {
+    background-color: #ffffff !important;
+    border: 2px solid #555 !important;
+    border-radius: 8px !important;
 }
+input {
+    background-color: transparent !important;
+    color: #000000 !important;
+    font-weight: 900 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* ⭐ 修正結算畫面 Expander (玩家框) 背景與文字，同時保護 SVG 箭頭圖示 */
+summary {
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 10px !important;
+    border: 2px solid #888 !important;
+    margin-bottom: 8px !important;
+}
+summary p {
+    color: #000000 !important;
+    font-weight: 900 !important;
+    font-size: 1.15rem !important;
+    font-family: 'Nunito', sans-serif;
+}
+summary svg {
+    fill: #000000 !important;
+    color: #000000 !important;
+}
+
+/* 標題與其他元素 */
 .main-title {
     font-family: 'Fredoka One', cursive; font-size: 2.8rem; text-align: center;
     background: linear-gradient(135deg, #cc2e2e, #b87100, #1b857e, #554dbe); 
@@ -750,8 +782,8 @@ def page_result():
                     st.markdown(f'<div style="background:#ffcdd2; border:3px solid #d50000; padding:8px 12px; border-radius:8px; color:#000000 !important; font-weight:900; font-size:1.1rem; margin-bottom:5px;">❌ 失衡懲罰 {imbal}</div>', unsafe_allow_html=True)
             
             with dc2:
-                bal_str = f'<div style="background:#b9f6ca; border:3px solid #00c853; color:#000000 !important; border-radius:6px; padding:4px 8px; margin-top:5px; font-weight:900;">+{bal_b} 均衡</div>' if bal_b else ''
-                imbal_str = f'<div style="background:#ffcdd2; border:3px solid #d50000; color:#000000 !important; border-radius:6px; padding:4px 8px; margin-top:5px; font-weight:900;">{imbal} 失衡</div>' if imbal else ''
+                bal_str = f'<div style="background:#b9f6ca; border:2px solid #00c853; color:#000000 !important; border-radius:6px; padding:4px 8px; margin-top:5px; font-weight:900;">+{bal_b} 均衡</div>' if bal_b else ''
+                imbal_str = f'<div style="background:#ffcdd2; border:2px solid #d50000; color:#000000 !important; border-radius:6px; padding:4px 8px; margin-top:5px; font-weight:900;">{imbal} 失衡</div>' if imbal else ''
                 
                 st.markdown(f"""<div style="background:#ffffff;border:4px solid {p.color['header']};border-radius:16px;padding:16px;text-align:center;box-shadow:0 6px 15px rgba(0,0,0,0.15);color:#000000;">
                     <div style="font-weight:900;">食物基礎</div><div style="font-size:2.2rem;font-weight:900;">{raw}</div>
