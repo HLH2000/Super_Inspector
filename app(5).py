@@ -1,6 +1,6 @@
 """
-最強糾察員 v5 ── 無限擴充 & 帝王條款版
-新增：移除手餐盤上限 / 同類累加扣分修復 / 空包彈失效機制 / 帝王條款 / 最先一盤模式
+最強糾察員 v5.2 ── 全食物種類超量扣分明確版
+確認：同類超過 3 張扣 10 分的機制適用於所有 9 種食物卡，且不同種類的違規會累加。
 """
 import streamlit as st
 import random
@@ -90,11 +90,11 @@ class Player:
         if has_veg and has_protein and has_carb:
             total += BALANCED_BONUS
             
-        # 修復扣分邏輯：第 4 張起，每多 1 張扣 10 分
+        # 針對所有 9 種食物種類進行檢查，只要該種類大於3張，就固定扣 10 分（多種違規可累加）
         for cat in FOOD_CATS:
             cnt = cats.count(cat)
             if cnt > 3:
-                total += IMBALANCE_PENALTY * (cnt - 3)
+                total += IMBALANCE_PENALTY
         return total
 
     def is_balanced(self):
@@ -227,9 +227,9 @@ def action_place(gs, hand_idx):
         else:
             gs["events"].append(f"🌟 {p.name} 達成均衡餐盤！額外 +{BALANCED_BONUS} 分！")
             
-    # 超量警報
-    if p.plate.count(card.cat) > 3:
-        gs["events"].append(f"⚠️ {p.name} 的 {card.cat} 超過 3 張，額外扣 10 分！")
+    # 超量警報（只有剛好達到第 4 張時才提示，避免後續重複刷頻，但分數依然會扣）
+    if p.plate.count(card.cat) == 4:
+        gs["events"].append(f"⚠️ {p.name} 的 {card.cat} 超過 3 張，扣 10 分！")
         
     st.session_state.sel = None
     check_emperor(gs, gs["turn"])
@@ -514,7 +514,8 @@ def page_setup():
         for cat, info in FOOD_CATS.items():
             st.markdown(f'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:2px solid #aaa;font-weight:900;color:#000000;"><span>{info["emoji"]} {cat}</span><span style="color:#b71c1c;">+{info["pts"]} 分</span></div>', unsafe_allow_html=True)
         st.markdown('<div style="padding:10px 0;color:#000000;font-weight:900;">🌟 均衡加成（蔬果+蛋白+澱粉）<b style="color:#1b5e20;">+5 分</b></div>', unsafe_allow_html=True)
-        st.markdown('<div style="color:#b71c1c;font-weight:900;">❌ 同類每超過3張 <b>−10 分</b>（無限累加）</div>', unsafe_allow_html=True)
+        # 更新設定畫面文案，清楚表明所有食物種類皆適用
+        st.markdown('<div style="color:#b71c1c;font-weight:900;">❌ 任一食物種類超過 3 張 <b>−10 分</b>（所有食物皆適用，多種違規可累加）</div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns([1, 2, 1])
@@ -693,7 +694,7 @@ def page_result():
         cats = {}
         for c in p.plate: cats[c.cat] = cats.get(c.cat, 0) + 1
         raw, bal_b = sum(c.pts for c in p.plate), BALANCED_BONUS if p.is_balanced() else 0
-        imbal = sum(IMBALANCE_PENALTY * (cnt - 3) for cat, cnt in cats.items() if cnt > 3)
+        imbal = sum(IMBALANCE_PENALTY for cat, cnt in cats.items() if cnt > 3)
 
         with st.expander(f"{medals[ri]} {p.name}  ── {p.score} 分", expanded=(ri == 0)):
             dc1, dc2 = st.columns([2, 1])
@@ -701,7 +702,7 @@ def page_result():
                 st.write(f"**餐盤：** {' '.join(c.emoji for c in p.plate) or '空'}")
                 for cat, cnt in cats.items():
                     pts_per, em = FOOD_CATS.get(cat, {}).get("pts", 0), FOOD_CATS.get(cat, {}).get("emoji", "")
-                    st.markdown(f'<div style="font-size:1.1rem;font-weight:900;padding:4px 0;">{em} {cat} × {cnt} 張 = <span style="color:#c62828;">{pts_per*cnt} 分</span>{"  ❌ 超量 " + str(IMBALANCE_PENALTY*(cnt-3)) if cnt > 3 else ""}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="font-size:1.1rem;font-weight:900;padding:4px 0;">{em} {cat} × {cnt} 張 = <span style="color:#c62828;">{pts_per*cnt} 分</span>{"  ❌ 超量 " + str(IMBALANCE_PENALTY) if cnt > 3 else ""}</div>', unsafe_allow_html=True)
                 if bal_b: st.success(f"✅ 均衡加成 +{bal_b}")
                 if imbal: st.error(f"❌ 失衡懲罰 {imbal}")
             with dc2:
