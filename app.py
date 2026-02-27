@@ -1,12 +1,13 @@
+#遊戲發想者:胡文馨
+#編寫:HLH
+#2026/02/27
+
 """
-遊戲發想者:胡文馨
-編寫:HLH
-2026/02/27
+最強糾察員 v6.1 
 """
-"""
-最強糾察員 v6.1 ── 終極去白字 & 滿版警報升級版
-修正：強制複寫 Streamlit 內建元件 (拉桿、文字框、單選) 在深色模式下的白色標籤與數值
-"""
+#── 終極去白字 & 滿版警報升級版
+#修正：強制複寫 Streamlit 內建元件 (拉桿、文字框、單選) 在深色模式下的白色標籤與數值
+
 import streamlit as st
 import random
 from dataclasses import dataclass, field
