@@ -2,8 +2,7 @@
 #編寫:HLH
 #2026/02/27
 """
-最強糾察員 v6.2 
-
+最強糾察員 v6.3 
 """
 import streamlit as st
 import random
@@ -223,7 +222,8 @@ def action_place(gs, hand_idx):
     should_alert = False
     if p.is_balanced():
         if gs["mode"] == "first_plate" and gs.get("countdown_turns") is None:
-            gs["countdown_turns"] = gs["mode_val"] * len(gs["players"])
+            # ⭐ 核心修正：+1 保證換人時不會吃到贏家未來的回合扣打，讓每個人都有完整 N 輪
+            gs["countdown_turns"] = (gs["mode_val"] * len(gs["players"])) + 1
             gs["events"].append(f"🚨 {p.name} 首位達成均衡餐盤！進入最後 {gs['mode_val']} 輪倒數！")
             gs["alert_msg"] = f"玩家 {p.name} 率先完成了均衡餐盤！遊戲正式進入最後 {gs['mode_val']} 輪倒數！"
             gs["phase"] = "alert_first_plate"
@@ -364,13 +364,12 @@ def resolve_pause(gs, target_idx):
     advance_turn(gs)
 
 # ══════════════════════════════════════════════════════════════════
-#  CSS (核彈級全文字黑化)
+#  CSS
 # ══════════════════════════════════════════════════════════════════
 CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
 
-/* ⭐ 絕對防護：覆寫 Streamlit 所有文字、標籤、按鈕、輸入框，保證全是高對比黑字 */
 html, body, p, div, span, h1, h2, h3, h4, h5, h6, label, input, button, a, li, ul, ol, strong, b, i, em, mark, small, del, ins, sub, sup {
     color: #000000 !important; 
     font-family: 'Nunito', sans-serif;
@@ -381,30 +380,21 @@ html, body, p, div, span, h1, h2, h3, h4, h5, h6, label, input, button, a, li, u
     background-attachment: fixed;
 }
 
-/* ⭐ 輸入框防護：純白底，確保文字清楚 */
 div[data-baseweb="base-input"], div[data-baseweb="input"] {
-    background-color: #ffffff !important;
-    border: 2px solid #555 !important;
-    border-radius: 8px !important;
+    background-color: #ffffff !important; border: 2px solid #555 !important; border-radius: 8px !important;
 }
 input {
-    background-color: transparent !important;
-    color: #000000 !important;
-    font-weight: 900 !important;
+    background-color: transparent !important; color: #000000 !important; font-weight: 900 !important;
     -webkit-text-fill-color: #000000 !important;
 }
 
-/* ⭐ 結算畫面防護：保證 Expander 不會被黑底吃掉 */
 summary {
-    background-color: rgba(255, 255, 255, 0.85) !important;
-    border-radius: 10px !important;
-    border: 2px solid #888 !important;
-    margin-bottom: 8px !important;
+    background-color: rgba(255, 255, 255, 0.85) !important; border-radius: 10px !important;
+    border: 2px solid #888 !important; margin-bottom: 8px !important;
 }
 summary p { font-weight: 900 !important; font-size: 1.15rem !important; }
 summary svg { fill: #000000 !important; color: #000000 !important; }
 
-/* 標題與其他元素 */
 .main-title {
     font-family: 'Fredoka One', cursive; font-size: 2.8rem; text-align: center;
     background: linear-gradient(135deg, #cc2e2e, #b87100, #1b857e, #554dbe); 
@@ -485,7 +475,6 @@ def render_card(card: Card, selected=False, small=False) -> str:
     e_sz = "1.7rem" if small else "2.2rem"
     return f'<div class="card {sel_cls}" style="background:{card.bg};border-color:{card.border};"><div class="card-emoji" style="font-size:{e_sz};">{card.emoji}</div><div class="card-name">{card.cat}</div><div class="card-desc">{card.desc}</div></div>'
 
-# ⭐ 單行壓縮，杜絕 Markdown 解析生成 <p> 標籤
 def render_ranking(players, ci, gs):
     ranked  = sorted(enumerate(players), key=lambda x: x[1].plate_score(), reverse=True)
     max_sc  = max((p.plate_score() for p in players), default=1) or 1
